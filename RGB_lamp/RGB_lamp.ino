@@ -1,7 +1,7 @@
 #define RED_PIN   9   // Пин для красного канала
 #define GREEN_PIN 10  // Пин для зелёного канала
 #define BLUE_PIN  11  // Пин для синего канала
-#define BUTTON_PIN 3  // Пин кнопки
+#define BUTTON_PIN 2  // Пин кнопки
 
 int effect = 0;   // Текущий эффект
 bool buttonState = HIGH;  
@@ -19,7 +19,7 @@ void loop() {
 
     if (buttonState == LOW && lastButtonState == HIGH) {  
         effect = (effect + 1) % 10;  // Переключение эффекта
-        delay(200);  // Антидребезг
+        delay(50);  // Антидребезг
     }
     lastButtonState = buttonState;
 
