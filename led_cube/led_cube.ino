@@ -134,20 +134,20 @@ void gyro() {
   short accelX = constrain(abs(accelData.accelX * 100), 0, 100);
   accelX = expRunningAverageX(accelX);
   accelX = map(accelX, 0, 100, 0, 255);
-  Serial.print(accelX);
-  Serial.print("\t");
+  //Serial.print(accelX);
+  //Serial.print("\t");
 
   short accelY = constrain(abs(accelData.accelY * 100), 0, 100);
   accelY = expRunningAverageY(accelY);
   accelY = map(accelY, 0, 100, 0, 255);
-  Serial.print(accelY);
-  Serial.print("\t");
+  //Serial.print(accelY);
+  //Serial.print("\t");
 
   short accelZ = constrain(abs(accelData.accelZ * 100), 0, 100);
   accelZ = expRunningAverageZ(accelZ);
   accelZ = map(accelZ, 0, 100, 0, 255);
-  Serial.print(accelZ);
-  Serial.println("\t");
+  //Serial.print(accelZ);
+  //Serial.println("\t");
 
   analogWrite(RED_PIN, accelX);
   analogWrite(GREEN_PIN, accelY);
