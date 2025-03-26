@@ -30,9 +30,7 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000);  //400khz clock
   Serial.begin(115200);
-  while (!Serial) {
-    ;
-  }
+  delay(50);
 
   //int err = IMU.init(calib, IMU_ADDRESS);
   int err = IMU.init(preload_calib, IMU_ADDRESS);
@@ -92,7 +90,7 @@ void loop() {
 
   if (buttonState == LOW && lastButtonState == HIGH) {
     effect = (effect + 1) % 10;  // Переключение эффекта
-    delay(50);                  // Антидребезг
+    delay(50);                   // Антидребезг
   }
   lastButtonState = buttonState;
 
@@ -101,7 +99,7 @@ void loop() {
     case 1: solidColor(0, 255, 0); break;  // Зелёный
     case 2: solidColor(0, 0, 255); break;  // Синий
     case 3: rainbow(); break;
-    case 4: gyro(); break;              // Фиолетовый пульс
+    case 4: gyro(); break;              // Гороскоп
     case 5: blink(255, 255, 0); break;  // Жёлтое мерцание
     case 6: colorFade(); break;
     case 7: runningLight(); break;
@@ -133,19 +131,19 @@ void gyro() {
   IMU.update();
 
   IMU.getAccel(&accelData);
-  short accelX = abs(accelData.accelX * 100);
+  short accelX = constrain(abs(accelData.accelX * 100), 0, 100);
   accelX = expRunningAverageX(accelX);
   accelX = map(accelX, 0, 100, 0, 255);
   Serial.print(accelX);
   Serial.print("\t");
 
-  short accelY = abs(accelData.accelY * 100);
+  short accelY = constrain(abs(accelData.accelY * 100), 0, 100);
   accelY = expRunningAverageY(accelY);
   accelY = map(accelY, 0, 100, 0, 255);
   Serial.print(accelY);
   Serial.print("\t");
 
-  short accelZ = min(abs(accelData.accelZ * 100), 100);
+  short accelZ = constrain(abs(accelData.accelZ * 100), 0, 100);
   accelZ = expRunningAverageZ(accelZ);
   accelZ = map(accelZ, 0, 100, 0, 255);
   Serial.print(accelZ);
@@ -219,4 +217,3 @@ float expRunningAverageZ(float newVal) {
   filVal += (newVal - filVal) * k;
   return filVal;
 }
-
