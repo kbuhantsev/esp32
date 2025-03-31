@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include "Madgwick.h"
 #include <OneButton.h>
+#include <GRGB.h>
 
 #define RED_PIN 9     // Пин для красного канала
 #define GREEN_PIN 10  // Пин для зелёного канала
@@ -27,6 +28,8 @@ const float k = 0.1;
 int effect = 0;  // Текущий эффект
 
 OneButton button(BUTTON_PIN, true);
+
+GRGB led(COMMON_CATHODE, RED_PIN, GREEN_PIN, BLUE_PIN);
 
 void checkTicks() {
   // include all buttons here to be checked
@@ -127,18 +130,15 @@ void solidColor(int r, int g, int b) {
 
 // Плавное изменение цветов
 void rainbow() {
-  static int i = 0;
+  static byte count = 0;  
   static unsigned long previousMillis = 0;
-  const int interval = 30;  // Интервал смены цветов (мс)
+  const int interval = 50;  // Интервал смены цвета (мс)
 
   if (millis() - previousMillis >= interval) {
     previousMillis = millis();
-
-    analogWrite(RED_PIN, sin(i * 0.024) * 127 + 128);
-    analogWrite(GREEN_PIN, sin((i + 85) * 0.024) * 127 + 128);
-    analogWrite(BLUE_PIN, sin((i + 170) * 0.024) * 127 + 128);
-
-    i = (i + 1) % 256;  // Зацикливание
+    
+    led.setWheel8(count); // Меняем цвет
+    count++; // Переполняется до 255, потом снова 0
   }
 }
 
