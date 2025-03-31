@@ -1,6 +1,8 @@
-#include "FastIMU.h"
+#include <Arduino.h>
+#include <FastIMU.h>
 #include <Wire.h>
 #include "Madgwick.h"
+#include <OneButton.h>
 
 #define RED_PIN 9     // Пин для красного канала
 #define GREEN_PIN 10  // Пин для зелёного канала
