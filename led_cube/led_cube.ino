@@ -27,7 +27,7 @@ MagData magData;
 const float k = 0.1;
 int effect = 0;  // Текущий эффект
 
-OneButton button(BUTTON_PIN, true);
+OneButton button(BUTTON_PIN, true, true);
 
 GRGB led(COMMON_CATHODE, RED_PIN, GREEN_PIN, BLUE_PIN);
 
@@ -38,9 +38,7 @@ void checkTicks() {
 
 // this function will be called when the button was pressed 1 time only.
 void singleClick() {
-  Serial.println("singleClick() detected.");
   effect = (effect + 1) % 10;
-  Serial.println(effect);
 }  // singleClick
 
 void setup() {
@@ -49,7 +47,7 @@ void setup() {
   Serial.begin(9600);
   delay(50);
 
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), checkTicks, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), checkTicks, CHANGE);
   button.attachClick(singleClick);
 
   //int err = IMU.init(calib, IMU_ADDRESS);
