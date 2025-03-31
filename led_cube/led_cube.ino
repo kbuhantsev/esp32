@@ -25,14 +25,29 @@ MagData magData;
 
 const float k = 0.1;
 int effect = 0;  // Текущий эффект
-bool buttonState = HIGH;
-bool lastButtonState = HIGH;
+
+OneButton button(BUTTON_PIN, true);
+
+void checkTicks() {
+  // include all buttons here to be checked
+  button.tick();  // just call tick() to check the state.
+}
+
+// this function will be called when the button was pressed 1 time only.
+void singleClick() {
+  Serial.println("singleClick() detected.");
+  effect = (effect + 1) % 10;
+  Serial.println(effect);
+}  // singleClick
 
 void setup() {
   Wire.begin();
   Wire.setClock(400000);  //400khz clock
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(50);
+
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), checkTicks, CHANGE);
+  button.attachClick(singleClick);
 
   //int err = IMU.init(calib, IMU_ADDRESS);
   int err = IMU.init(preload_calib, IMU_ADDRESS);
@@ -83,18 +98,11 @@ void setup() {
   pinMode(RED_PIN, OUTPUT);
   pinMode(GREEN_PIN, OUTPUT);
   pinMode(BLUE_PIN, OUTPUT);
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
 }
 
 void loop() {
 
-  buttonState = digitalRead(BUTTON_PIN);
-
-  if (buttonState == LOW && lastButtonState == HIGH) {
-    effect = (effect + 1) % 10;  // Переключение эффекта
-    delay(50);                   // Антидребезг
-  }
-  lastButtonState = buttonState;
+  button.tick();
 
   switch (effect) {
     case 0: solidColor(255, 0, 0); break;  // Красный
@@ -119,11 +127,18 @@ void solidColor(int r, int g, int b) {
 
 // Плавное изменение цветов
 void rainbow() {
-  for (int i = 0; i < 256; i++) {
+  static int i = 0;
+  static unsigned long previousMillis = 0;
+  const int interval = 30;  // Интервал смены цветов (мс)
+
+  if (millis() - previousMillis >= interval) {
+    previousMillis = millis();
+
     analogWrite(RED_PIN, sin(i * 0.024) * 127 + 128);
     analogWrite(GREEN_PIN, sin((i + 85) * 0.024) * 127 + 128);
     analogWrite(BLUE_PIN, sin((i + 170) * 0.024) * 127 + 128);
-    delay(30);
+
+    i = (i + 1) % 256;  // Зацикливание
   }
 }
 
@@ -160,45 +175,90 @@ void gyro() {
 
 // Мерцание случайными цветами
 void randomFlash() {
-  solidColor(random(256), random(256), random(256));
-  delay(200);
+  static unsigned long previousMillis = 0;
+  const int interval = 200;  // Интервал вспышек (мс)
+
+  if (millis() - previousMillis >= interval) {
+    previousMillis = millis();
+
+    solidColor(random(256), random(256), random(256));  // Случайный цвет
+  }
 }
+
 
 // Бегущий огонёк (эффект волны)
 void runningLight() {
-  for (int i = 0; i < 3; i++) {
+  static int i = 0;
+  static unsigned long previousMillis = 0;
+  const int interval = 200;  // Интервал смены цвета (мс)
+
+  if (millis() - previousMillis >= interval) {
+    previousMillis = millis();
+
     analogWrite(RED_PIN, i == 0 ? 255 : 0);
     analogWrite(GREEN_PIN, i == 1 ? 255 : 0);
     analogWrite(BLUE_PIN, i == 2 ? 255 : 0);
-    delay(200);
+
+    i = (i + 1) % 3;  // Переключение между цветами (0 → 1 → 2 → 0 ...)
   }
 }
 
 // Стробоскоп
 void strobe(int r, int g, int b) {
-  for (int i = 0; i < 10; i++) {
-    solidColor(r, g, b);
-    delay(50);
-    solidColor(0, 0, 0);
-    delay(50);
+  static int count = 0;
+  static unsigned long previousMillis = 0;
+  static bool isOn = false;
+  const int interval = 50;  // Интервал мигания (мс)
+
+  if (count < 10 && millis() - previousMillis >= interval) {
+    previousMillis = millis();
+    isOn = !isOn;  // Переключаем состояние
+
+    if (isOn) {
+      solidColor(r, g, b);  // Включаем цвет
+    } else {
+      solidColor(0, 0, 0);  // Выключаем
+      count++;              // Увеличиваем счетчик только после полного цикла (вкл-выкл)
+    }
+    if (count >= 10) {
+      count = 0;  // Автоматический сброс
+    }
   }
 }
 
+
 // Мигание цветами
 void blink(int r, int g, int b) {
-  solidColor(r, g, b);
-  delay(500);
-  solidColor(0, 0, 0);
-  delay(500);
+  static unsigned long previousMillis = 0;
+  static bool isOn = false;
+  const int interval = 500;  // Интервал мигания (мс)
+
+  if (millis() - previousMillis >= interval) {
+    previousMillis = millis();
+    isOn = !isOn;  // Переключаем состояние
+
+    if (isOn) {
+      solidColor(r, g, b);  // Включаем цвет
+    } else {
+      solidColor(0, 0, 0);  // Выключаем
+    }
+  }
 }
 
 // Плавная смена цветов
 void colorFade() {
-  for (int i = 0; i < 255; i++) {
+  static int i = 0;
+  static unsigned long previousMillis = 0;
+  const int interval = 10;  // Интервал обновления (мс)
+
+  if (millis() - previousMillis >= interval) {
+    previousMillis = millis();
+
     analogWrite(RED_PIN, i);
     analogWrite(GREEN_PIN, 255 - i);
     analogWrite(BLUE_PIN, i / 2);
-    delay(10);
+    i++;
+    if (i > 255) i = 0;  // Зацикливание эффекта
   }
 }
 
